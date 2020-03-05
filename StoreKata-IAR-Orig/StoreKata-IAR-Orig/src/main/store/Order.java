@@ -24,81 +24,61 @@ public class Order {
 		this.items = new HashSet<OrderItem>();
 	}
 
-	public Customer getCustomer() 
-	{
+	public Customer getCustomer() {
 		return customer;
 	}
 
-	public Salesman getSalesman() 
-	{
+	public Salesman getSalesman() {
 		return salesman;
 	}
 
-	public Date getOrderedOn() 
-	{
+	public Date getOrderedOn() {
 		return orderedOn;
 	}
 
-	public String getDeliveryStreet() 
-	{
+	public String getDeliveryStreet() {
 		return deliveryStreet;
 	}
 
-	public String getDeliveryCity() 
-	{
+	public String getDeliveryCity() {
 		return deliveryCity;
 	}
 
-	public String getDeliveryCountry() 
-	{
+	public String getDeliveryCountry() {
 		return deliveryCountry;
 	}
 
-	public Set<OrderItem> getItems() 
-	{
+	public Set<OrderItem> getItems() {
 		return items;
 	}
 
-	public float total() 
-	{
+	public float total() {
 		float totalItems = 0;
-		for (OrderItem item : items) 
-		{
-			float totalItem=0;
-			float itemAmount = item.getProduct().getUnitPrice() * item.getQuantity();
-			if (item.getProduct().getCategory() == ProductCategory.Accessories) 
-			{
-				float booksDiscount = 0;
-				if (itemAmount >= 100) 
-				{
-					booksDiscount = itemAmount * 10 / 100;
-				}
-				totalItem = itemAmount - booksDiscount;
-			}
-			if (item.getProduct().getCategory() == ProductCategory.Bikes) 
-			{
-				// 20% discount for Bikes
-				totalItem = itemAmount - itemAmount * 20 / 100;
-			}
-			if (item.getProduct().getCategory() == ProductCategory.Cloathing) 
-			{
-				float cloathingDiscount = 0;
-				if (item.getQuantity() > 2) 
-				{
-					cloathingDiscount = item.getProduct().getUnitPrice();
-				}
-				totalItem = itemAmount - cloathingDiscount;
-			}
+		totalItems = calculateTotalForItems(totalItems);
+		int shipping = calculateShipping();
+		return totalItems + calculateTax(totalItems) + shipping;
+	}
+
+	private int calculateShipping() {
+		if (isUSACountry()){
+			return 0;
+		}
+		return 15;
+	}
+
+	private float calculateTax(float totalItems) {
+		return totalItems * 5 / 100;
+	}
+
+	private boolean isUSACountry() {
+		return this.deliveryCountry == "USA";
+	}
+
+	private float calculateTotalForItems(float totalItems) {
+		for (OrderItem item : items) {
+			float totalItem = item.calculateTotalFor();
 			totalItems += totalItem;
 		}
-
-		if (this.deliveryCountry == "USA")
-		{
-			// total=totalItems + tax + 0 shipping
-			return totalItems + totalItems * 5 / 100;
-		}
-
-		// total=totalItemst + tax + 15 shipping
-		return totalItems + totalItems * 5 / 100 + 15;
+		return totalItems;
 	}
 }
